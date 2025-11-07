@@ -4,10 +4,14 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# ✅ CORS: wildcard origins, χωρίς credentials
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], allow_credentials=True,
-    allow_methods=["*"], allow_headers=["*"],
+    allow_origins=["*"],      # ή βάλε το Bolt URL εδώ για πιο αυστηρό CORS
+    allow_credentials=False,  # σημαντικό για να μην μπλοκάρει ο browser
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class DnaIn(BaseModel):
@@ -64,10 +68,9 @@ def explain_endpoint(inp: DnaIn):
     try:
         msg = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[{"role":"user","content":prompt}],
+            messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
         )
         return {"explanation": msg.choices[0].message.content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
